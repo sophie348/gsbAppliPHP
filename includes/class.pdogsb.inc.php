@@ -244,7 +244,7 @@ class PdoGsb
      */
     public function majNbJustificatifs($idVisiteur, $mois, $nbJustificatifs)
     {
-        $requetePrepare = PdoGB::$monPdo->prepare(
+        $requetePrepare = PdoGSB::$monPdo->prepare(
             'UPDATE fichefrais '
             . 'SET nbjustificatifs = :unNbJustificatifs '
             . 'WHERE fichefrais.idvisiteur = :unIdVisiteur '
@@ -432,6 +432,23 @@ class PdoGsb
         }
         return $lesMois;
     }
+    
+    /**
+     * 
+     * @return type tableau associatif avec toutes les donnees des visiteurs
+     */
+   public function getTousLesVisiteurs()
+    {
+        $requetePrepare = PdoGsb::$monPdo->prepare(
+            'SELECT visiteur.id as id,visiteur.prenom as prenom ,visiteur.nom as nom '
+            . 'FROM visiteur '
+            . 'ORDER BY nom DESC'
+        );
+        $requetePrepare->execute();
+        return $requetePrepare->fetchAll();
+    }
+    
+   
 
     /**
      * Retourne les informations d'une fiche de frais d'un visiteur pour un
@@ -546,12 +563,118 @@ public function getNom($id){
  * @param type $mois
  */
 public function ficheMoisPrecedentCL($mois){
-    $requetePrepare= PdoGsb::$monPdo->prepare("UPDATE fichefrais SET fichefrais.idetat='CL' WHERE fichefrais.mois= :unMois ");
+    $requetePrepare= PdoGsb::$monPdo->prepare("UPDATE fichefrais SET fichefrais.idetat='CL' WHERE fichefrais.mois= :unMois AND fichefrais.idetat='CR'");
     $requetePrepare->bindParam(':unMois',$mois,PDO::PARAM_STR);
     $requetePrepare->execute();
 }
 
 
 
+/**
+ * ajouter REFUSER devant un fraisHF
+ * @param type $id
+ */
+public function refuserFraisHorsForfait($id){
+     $requetePrepare= PdoGsb::$monPdo->prepare("UPDATE lignefraishorsforfait SET lignefraishorsforfait.libelle=CONCAT('REFUSER-',lignefraishorsforfait.libelle) where lignefraishorsforfait.id=:unId");
+     $requetePrepare->bindParam(':unId',$id,PDO::PARAM_STR);
+     $requetePrepare->execute();
+}
 
+/**
+ * mettre a jour un frais horsforfait
+ * @param type $id
+ * @param type $libelle
+ * @param type $montant
+ */
+public function majFraisHorsForfait($id,$libelle,$montant){
+    $requetePrepare= PdoGsb::$monPdo->prepare("UPDATE lignefraishorsforfait SET lignefraishorsforfait.libelle=:unLibelle, lignefraishorsforfait.montant=:unMontant where lignefraishorsforfait.id=:unId");
+     $requetePrepare->bindParam(':unId',$id,PDO::PARAM_STR);
+     $requetePrepare->bindParam(':unLibelle',$libelle,PDO::PARAM_STR);
+     $requetePrepare->bindParam(':unMontant',$montant,PDO::PARAM_STR);
+     $requetePrepare->execute();
+}
+
+/**
+ * 
+ * @return type tableau associatif de tous les visiteurs dont la fiche est validée VA
+ */ 
+public function getTousLesVisiteursVA()
+    {
+        $requetePrepare = PdoGsb::$monPdo->prepare(
+          "SELECT distinct id,prenom,nom FROM visiteur join fichefrais ON visiteur.id=fichefrais.idvisiteur where fichefrais.idetat='VA'||fichefrais.idetat='RB' ORDER BY nom DESC"
+            );
+        $requetePrepare->execute();
+        return $requetePrepare->fetchAll();
+    }
+
+/**
+ * 
+ * @return type tableau associatif de tous les mois VA
+ */    
+ public function getTousLesMoisVA()
+    {
+        $requetePrepare = PdoGsb::$monPdo->prepare(
+            "SELECT distinct fichefrais.mois as mois FROM fichefrais where fichefrais.idetat='VA'||fichefrais.idetat='RB' ORDER BY mois DESC"
+        );
+        $requetePrepare->execute();
+        return $requetePrepare->fetchAll();
+    }
+    
+ /**
+  * montant des frais forfait
+  * @param type $id
+  * @param type $mois
+  * @return type decimal
+  */
+    public function sommeFF($id,$mois){
+      $requetePrepare = PdoGsb::$monPdo->prepare(
+        'SELECT SUM(lignefraisforfait.quantite*fraisforfait.montant)'  
+        .'FROM lignefraisforfait join fraisforfait on (lignefraisforfait.idfraisforfait=fraisforfait.id)' 
+        .'WHERE idvisiteur = :unId '
+        .'AND mois = :unMois '
+        );
+        $requetePrepare->bindParam(':unId', $id, PDO::PARAM_STR);
+        $requetePrepare->bindParam(':unMois', $mois, PDO::PARAM_STR);
+        $requetePrepare->execute();  
+        return $requetePrepare->fetch();
+      
+ }
+    
+ /**
+  * montant des frais forfait
+  * @param type $id
+  * @param type $mois
+  * @return type decimal
+  */
+ public function sommeHF($id,$mois){
+    $requetePrepare = PdoGsb::$monPdo->prepare(
+        'SELECT SUM(lignefraishorsforfait.montant) '
+        . 'FROM lignefraishorsforfait '
+        . 'WHERE lignefraishorsforfait.idvisiteur = :unIdVisiteur '
+        . 'AND lignefraishorsforfait.mois = :unMois '
+        . 'AND lignefraishorsforfait.libelle not in (SELECT libelle '
+                . 'FROM lignefraishorsforfait '
+                . 'WHERE libelle like "REFUSER-%")'    
+        );
+     $requetePrepare->bindParam(':unIdVisiteur', $id, PDO::PARAM_STR);
+        $requetePrepare->bindParam(':unMois', $mois, PDO::PARAM_STR);
+        $requetePrepare->execute();  
+        return $requetePrepare->fetch();
+ }
+ 
+ /**
+  * mettre a jour le montant valider
+  * @param type $montant
+  * @param type $id
+  * @param type $mois
+  */
+ public function majMontant($montant,$id,$mois){
+     $requetePrepare = PdoGsb::$monPdo->prepare("UPDATE fichefrais SET montantvalide=:unMontant,fichefrais.datemodif=now() where idvisiteur=:unId and mois=:unMois" );
+      $requetePrepare->bindParam(':unMontant', $montant, PDO::PARAM_STR);
+     $requetePrepare->bindParam(':unId', $id, PDO::PARAM_STR);
+        $requetePrepare->bindParam(':unMois', $mois, PDO::PARAM_STR);
+        $requetePrepare->execute();  
+     
+ }
+ 
 }

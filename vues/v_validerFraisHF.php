@@ -1,70 +1,105 @@
 <?php
-
-
-
-/* 
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/** 
+ * Affichage des frais hors forfaits
+ * @category  PPE
+ * @package   GSB
+ * @author Sophie Abouaf
  */
-?>
+?><hr>
+<div class="row">
 <div class="panel panel-info">
     <div class="panel-heading">Frais hors forfait</div>
-    <form action="index.php?uc=saisirLesFrais&action=majFraisHF" method="post" role="form" >
     
-   <?php       
-   foreach ($fichesHf as $unFraisHF){
-      $libelleHF=$unFraisHF['libelle'];
-     ?>
-    <table class="table table-bordered table-responsive">
+    
+        <table class="table table-bordered table-responsive">
         <tr>
-            <td>Nom</td><td>mois</td><td>libelle</td><td>date</td><td>montant</td><td>validation</td>
+            <td>Nom</td><td>id</td><td>mois</td><td>libelle</td><td>date</td><td>montant</td><td>validation, corriger ou reporter</td>
         
                 
            </tr>
+           
+   <?php       
+   foreach ($fichesHf as $unFraisHF){
+      $libelleHF=htmlspecialchars($unFraisHF['libelle']);
+      $dateHF= $unFraisHF['date'];
+      $montantHF=$unFraisHF['montant'];
+  
+      $idfHF=$unFraisHF['id'];
+     ?>
+     <form action="index.php?uc=saisirLesFrais&action=majFraisHF" method="post" role="form">      
+    
         <tr>
-            <input type="hidden" name="hf" value="<?php echo $unFraisHF['id'];?>">
-            <input type="hidden" name="idvisiteurHF" value="<?php echo $unFraisHF['idvisiteur'];?>">
-            <input type="hidden" name="moisHF" value="<?php echo $unFraisHF['mois'];?>">
-            <input type="hidden" name="libelleHF" value="<?php echo $unFraisHF['libelle'];?>">
-          
+            
+            <input type="hidden" name="idvisiteurHF" value="<?php echo $idv?>">
+            <input type="hidden" name="dateHF" value="<?php echo $dateHF;?>">
            
             
-            <td><?php
-            echo $idv; ?>
+            <td><?php echo $idv ?>
+            
             
             </td>
            
-            <td><?php
-            echo $mois;?>
+            <td><input class="form-control" value=<?php echo $idfHF?> name="hf" type="text" maxlength="30" >
+            
+            
+            </td>
+            <td><input class="form-control" value=<?php echo $moisC?> name="moisHF" type="text" maxlength="30" >
+            
             
             </td>
             <td>
-                <?php
-            echo $unFraisHF['libelle'];?>
+                <input class="form-control" value=<?php echo $libelleHF?> name="libelleHF" type="text" maxlength="30" >
+                
             
             </td>
-            <td><?php
-            echo $unFraisHF['date'];?>
+            <td><?php echo $dateHF;?>
+            
             
             </td>
-            </td>
-            <td><?php
-            echo $unFraisHF['montant'];?>
+            
+            <td>
+                <input class="form-control" value=<?php echo $montantHF ?> name="montantHF" type="text" maxlength="30" >
+                
             
             </td>
             
           
-            <td><input id="actualiser" type="submit" value="Supprimer" name="supprimer" class="btn btn-danger" 
-                       role="button"></td>
+            <td><button type="submit"  name="refuser" class="btn btn-danger" >Refuser</button>
+                       
+                <button type="submit"  name="corriger" class="btn btn-warning">Corriger</button>
+                       
+                <button type="submit" name="reporter" class="btn btn-Light">Reporter</button>
+                       </td>
             
              
         </tr>
-        
+                
+                     </form>
+
+ 
        <?php
             }?>
-        
+       
+
     </table>
-</form>
+</div>
+    <div class="row" >
+        
+        <div class="col-md-4">
+        <h3>Validation des données</h3>
+        <form  action="index.php?uc=saisirLesFrais&action=majFraisHF" method="post" role="form">
+           <div>
+                <label for="nbJ">Nombre de justificatifs: </label>
+                <input type="text" id="nbJ" name="nbJ" size="10" value="<?php echo $nbjHF ?>"> 
+                <input type="hidden" name="idvisiteurHF" value="<?php echo $idv?>">
+                <input type="hidden" name="moisHF" value="<?php echo $moisC;?>">
+            </div> 
+            <div>
+                <button class="btn btn-success" type="submit" name="validerfiche">Validation de la fiche</button> 
+            </div>
+        </div>
+          
+        </form>   
+        </div>
 </div>
 

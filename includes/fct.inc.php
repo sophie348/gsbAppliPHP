@@ -58,6 +58,30 @@ function connecter($idVisiteur, $nom, $prenom,$categorie)
 }
 
 /**
+ * 
+ * @param type $mois sous la forme 202105
+ * @return type array des mois précédents
+ */
+ function getLesDouzeMois($mois){
+    $lesMois=array(); 
+     for ($k=0;$k<=12;$k++){
+         $mois= getMoisPrecedent($mois);
+         $numAnnee= substr($mois,0,4);
+         $numMois= substr($mois,4,2);
+         
+         $lesMois[]= array(
+             'mois'=>$mois,
+             'numMois'=>$numMois,
+             'numAnnee'=>$numAnnee
+         );
+       
+     }
+     return $lesMois;
+     }
+
+
+
+/**
  * Détruit la session active
  *
  * @return null
@@ -249,6 +273,19 @@ function ajouterErreur($msg)
         $_REQUEST['erreurs'] = array();
     }
     $_REQUEST['erreurs'][] = $msg;
+}
+
+/**
+ * 
+ * Ajoute un libelle d'un message au tableau des messages
+ * 
+ * @param type $msg libelle du message
+ */
+function affichermessage($msg){
+    if(!isset($_REQUEST['messages'])){
+        $_REQUEST['messages']=array();
+    }
+    $_REQUEST['messages'][]=$msg;
 }
 
 /**

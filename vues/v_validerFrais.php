@@ -1,13 +1,16 @@
 <?php
- if(empty($fichesFrais)){
-            echo "Pas de fiche de frais pour ce visiteur ce mois" ;
-       }
- 
+ /** 
+ * Affichage des frais forfaits
+ * @category  PPE
+ * @package   GSB
+ * @author Sophie Abouaf
+ */
 ?>
 <hr>
+<div class="row">
 <div class="panel panel-primary">
     <div class="panel-heading">Fiche de frais du mois 
-        <?php echo $nom . '-' . $mois ?> : </div>
+        <?php echo $nomC . '-' . $moisC ?> : </div>
     
 </div>
 <div class="panel panel-info">
@@ -18,11 +21,13 @@
         <tr>
             <td>Nom</td><td>mois</td><td>libelle</td><td>quantite</td>
         </tr>
-            <input type="hidden" name="mm" value="<?php echo $mois?>">
-            <input type="hidden" name="nn" value="<?php echo $nom?>">          
+           <input type="hidden" name="mm" value="<?php echo $moisC?>">
+           <input type="hidden" name="nn" value="<?php echo $nomC?>">     
+           <input type="hidden" name="i" value="<?php echo $idv?>">     
            <?php        
           
-           foreach ($fichesFrais as $unFrais){?>
+           foreach ($fichesFrais as $unFrais){
+               $libelle= htmlspecialchars($unFrais['libelle']);?>
         <tr>
         
             <td><?php
@@ -31,11 +36,11 @@
             </td>
            
             <td><?php
-            echo $mois;?>
+            echo $moisC;?>
             
             </td>
             <td><?php
-            echo $unFrais['libelle'];?>
+            echo $libelle?>
             
             </td>
             <td>
@@ -51,12 +56,15 @@
            ?>
          
     </table>
+            
        <input id="actualiser" type="submit" value="Actualiser" class="btn btn-success" 
                    role="button">
        
     </form>
 
 </div>
+</div>
+
 
 
 

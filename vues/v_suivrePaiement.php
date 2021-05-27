@@ -1,23 +1,23 @@
 <?php
 /** 
- * choix visiteur et mois
+ * vue affichage des frais pour mettre en paiement
  * @category  PPE
  * @package   GSB
  * @author Sophie Abouaf
  */
 
-
-
 ?>
 
-<h2>Choisir un visiteur et un mois(dans les 12 derniers)</h2>
+
+
+<h2>Choisir un visiteur et un mois(Parmi les fiches validées)</h2>
 
 <div class="row">
     <div class="col-md-4">
         
     </div>
     <div class="col-md-4">
-        <form action="index.php?uc=saisirLesFrais&action=afficheLaFiche"  
+        <form action="index.php?uc=suivreLePaimentFicheDeFrais&action=afficheLaFicheVA"  
               method="post" role="form">
             <div class="form-group">
                 <label for="lstVisiteur" accesskey="n">Visiteur : </label>
@@ -49,8 +49,8 @@
                     <?php
                     foreach ($lesMois as $unMois) {
                         $mois = $unMois['mois'];
-                        $numAnnee = $unMois['numAnnee'];
-                        $numMois = $unMois['numMois'];
+                        $numAnnee = substr($mois,0,4);
+                        $numMois = substr($mois,4,2);
                         if ($mois == $moisASelectionner) {
                             ?>
                             <option selected value="<?php echo $mois ?>">
